@@ -27,7 +27,7 @@ class TableChar
 		return null;
 	}
 	
-	getCharacters()
+	getCharacters(id)
 	{
 		return this.characters;
 	}

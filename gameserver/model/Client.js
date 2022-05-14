@@ -3,6 +3,8 @@ const Crypt = require("./crypt");
 const BaseRecievePacket = require("../network/BaseRecievePacket");
 const BaseSendablePacket = require("../network/BaseSendablePacket");
 const IncomingPackets = require("../network/IncomingPackets");
+const TableChar = require("../data/TableChar");
+const Character = require("./Character");
 const LOGGER = (new (require("../logger/Logger"))("Client"));
 
 class Client
@@ -110,6 +112,10 @@ class Client
 	{
 		this.activeChar = activeChar;
 	}
+
+	setState(val) {
+		this.state = val;
+	}
 	
 	close(block = null) 
 	{
@@ -121,6 +127,22 @@ class Client
 		{
 			this.socket.end();
 		}
+	}
+
+	loadChar(slot) {
+		if (slot < 0) {
+			return null;
+		}
+
+		let characters = TableChar.getCharacters(this.getAccountName());
+
+		if (characters.length < slot || !characters[slot]) {
+			return null;
+		}
+
+		let character = new Character(characters[slot]);
+
+		return character;
 	}
 }
 module.exports = Client;

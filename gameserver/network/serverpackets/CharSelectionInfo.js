@@ -39,8 +39,6 @@ class CharSelectionInfo
 		for (let i = 0; i < characters.length; i++)
 		{
 			let character = characters[i];
-			console.log(character)
-			
 			packet.writeS(character.name); // Character name
 			packet.writeD(character.id); // Character ID
 			packet.writeS(this.loginName); // Account name
