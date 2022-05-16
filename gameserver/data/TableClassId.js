@@ -1,9 +1,9 @@
-const Race = require('./Race');
-let ClassId = {
+const Race = require('../enums/Race');
+const data = {
 	'fighter': { 'id': 0, 'mage': false, 'race': Race.human, 'parent': null },
 	'warrior': { 'id': 1, 'mage': false, 'race': Race.human, 'parent': 'fighter' },
 	'gladiator': { 'id': 2, 'mage': false, 'race': Race.human, 'parent': 'warrior' },
-	'warlord': { 'id': 3, 'mage': false, 'race': Race.human, 'parent': 'warrior' },
+		'warlord': { 'id': 3, 'mage': false, 'race': Race.human, 'parent': 'warrior' },
 		'knight': { 'id': 4, 'mage': false, 'race': Race.human, 'parent': 'fighter' },
 		'paladin': { 'id': 5, 'mage': false, 'race': Race.human, 'parent': 'knight' },
 		'dark_avenger': { 'id': 6, 'mage': false, 'race': Race.human, 'parent': 'knight' },
@@ -190,5 +190,41 @@ let ClassId = {
 		'stratomancer': { 'id': 187, 'mage': true, 'race': Race.ertheia, 'parent': 'cloud_breaker' },
 		'eviscerator': { 'id': 188, 'mage': false, 'race': Race.ertheia, 'parent': 'ripper' },
 		'sayha_seer': { 'id': 189, 'mage': true, 'race': Race.ertheia, 'parent': 'stratomancer' }
+	};
+
+class TableClassId
+{
+	constructor()
+	{
 	}
-module.exports = ClassId;
+
+	get(id) {
+		for (let key in data) {
+			if (data[key].id == id) {
+				return data[key];
+			}
+		}
+		return null;
+	}
+	
+	getRootClassId(id)
+	{
+		let title = this.get(id);
+		if (title == null) {
+			return null;
+		}
+		return (title.parent != null) ? data[title.parent].id : title.id;
+	}
+
+	getRandomClass() {
+		for (let i = 0; i < 100; i++) {
+			let id = Math.round(Math.random() * 189);
+			let classid = this.get(id);
+			if (classid != null && classid.race != null && classid.parent != null) {
+				return classid;
+			}
+		}
+		return null;
+	}
+}
+module.exports = new TableClassId();

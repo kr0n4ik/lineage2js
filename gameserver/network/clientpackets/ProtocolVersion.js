@@ -2,7 +2,7 @@
 const KeyPacket = require("../serverpackets/KeyPacket");
 const LOGGER = (new (require("../../logger/Logger"))("ProtocolVersion"));
 
-class SendProtocolVersion 
+class ProtocolVersion 
 {
 	run(client, packet) 
 	{
@@ -24,4 +24,4 @@ class SendProtocolVersion
 		}
 	}
 }
-module.exports = SendProtocolVersion;
+module.exports = ProtocolVersion;

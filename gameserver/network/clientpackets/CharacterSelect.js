@@ -1,8 +1,8 @@
 const ConnectionState = require("../../enums/ConnectionState");
 const CharacterSelected = require("../serverpackets/CharacterSelected");
-const LOGGER = (new (require("../../logger/Logger"))("RequestGameStart"));
+const LOGGER = (new (require("../../logger/Logger"))("CharacterSelect"));
 
-class RequestGameStart
+class CharacterSelect
 {
 	run(client, packet) 
 	{
@@ -27,4 +27,4 @@ class RequestGameStart
 		}
 	}
 }
-module.exports = RequestGameStart;
+module.exports = CharacterSelect;

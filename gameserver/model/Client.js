@@ -17,6 +17,7 @@ class Client
 		this.protocol = false;
 		this.key = null;
 		this.session = null;
+		this.tracert = null;
 	}
 	
 	read(buffer)
@@ -40,13 +41,13 @@ class Client
 		let opcode = packet.readC();
 		
 		//this.helper(buffer);
-		if (!fs.existsSync("gameserver/network/clientpackets/" + IncomingPackets[opcode] + ".js")) 
+		if (!fs.existsSync("gameserver/network/clientpackets/" + IncomingPackets[opcode].packet + ".js"))
 		{
-			LOGGER.error("Not found packet 0x" + ("0" + opcode.toString(16)).substr(-2) + " " + IncomingPackets[opcode].green);
+			LOGGER.error("Not found packet 0x" + ("0" + opcode.toString(16)).substr(-2) + " " + (IncomingPackets[opcode].packet).green);
 			return;
 		}
 		//try {
-			(new (require("../network/clientpackets/" + IncomingPackets[opcode]))()).run(this, packet);
+		(new (require("../network/clientpackets/" + IncomingPackets[opcode].packet))()).run(this, packet);
 		//} catch(err) {
 			//console.log(err);
 		//}
@@ -65,6 +66,10 @@ class Client
 		buffer[0] = buffer.length & 0xFF;
 		buffer[1] = (buffer.length >> 8) & 0xFF;
 		this.socket.write(buffer);
+	}
+
+	setClientTracert(val) {
+		this.tracert = val;
 	}
 	
 	isProtocolOk() 
@@ -127,6 +132,10 @@ class Client
 		{
 			this.socket.end();
 		}
+	}
+
+	getParty() {
+		return null;
 	}
 
 	loadChar(slot) {

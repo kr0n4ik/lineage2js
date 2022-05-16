@@ -2,7 +2,7 @@
 const CharSelectionInfo = require("../serverpackets/CharSelectionInfo");
 const LOGGER = (new (require("../../logger/Logger"))("AuthLogin"));
 
-class RequestLogin 
+class AuthLogin 
 {
 	run(client, packet) 
 	{
@@ -30,4 +30,4 @@ class RequestLogin
 		}
 	}
 }
-module.exports = RequestLogin;
+module.exports = AuthLogin;

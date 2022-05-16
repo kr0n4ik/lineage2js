@@ -1,6 +1,7 @@
 const Generator = require('../generator/generator');
 const TableBaseStats = require('./TableBaseStats');
-const ClassId = require('../enums/ClassId');
+const TableInitialEquipment = require('./TableInitialEquipment');
+const TableClassId = require('./TableClassId');
 const LOGGER = (new (require("../logger/Logger"))("TableChar"));
 
 class TableChar
@@ -31,30 +32,24 @@ class TableChar
 	{
 		return this.characters;
 	}
+
+	setOnlineStatus(id) {
+		let col = this.getCharacters(id);
+		if (col != null) {
+			col.last = Date.now();
+			col.online = true;
+		}
+	}
 	
 	
 	setRandomChar()
 	{
-		function getRandomClass()
-		{
-			for (let i = 0; i < 100; i++)
-			{
-				let classid = Math.round(Math.random() * 200);
-				for (let key in ClassId)
-				{
-					if (classid == ClassId[key].id && ClassId[key].race != null && ClassId[key].parent == null)
-					{
-						return ClassId[key];
-					}
-				}
-			}
-			return null;
-		}
 
-
-		let classid = getRandomClass();
+		let classid = TableClassId.getRandomClass();
 
 		let stats = TableBaseStats.get(classid.id);
+
+		let inventory = TableInitialEquipment.get(classid.id);
 
 		let rndPosition = Math.round(Math.random() * (stats.staticData.creationPoints.length - 1));
 		
@@ -67,12 +62,13 @@ class TableChar
 		let sex = Math.round(Math.random());
 
 		this.characters.push({
+			'online' : false,
 			'id': Generator.getNextId(),
 			'name': "Tester-" + Math.round(Math.random() * 1000),
 			'sex': sex,
 			'race': classid.race,
 			'classid': classid.id,
-			'baseid': classid.id,
+			'baseid': TableClassId.getRootClassId(classid.id),
 			'x': parseFloat(stats.staticData.creationPoints[rndPosition].x),
 			'y': parseFloat(stats.staticData.creationPoints[rndPosition].y),
 			'z': parseFloat(stats.staticData.creationPoints[rndPosition].z),
@@ -90,10 +86,12 @@ class TableChar
 			'hair_style': Math.round(Math.random() * (sex == 0) ? 4 : 6), //дескриминация у мужского тоолько 4 причестки
 			'hair_color': Math.round(Math.random() * 3),
 			'vp': Math.round(Math.random() * 1000),
+			'cp': Math.round(Math.random() * 1000),
 			'deletetime': 0,
-			'last': Math.round(Math.random() * 1000),
+			'last': Date.now(),
 			'nobless': Math.round(Math.random() * 1000),
-			'access': Math.round(Math.random() * 1000)
+			'access': Math.round(Math.random() * 1000),
+			'inventory': inventory
 		});
 	}
 }
