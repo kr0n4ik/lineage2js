@@ -1,6 +1,6 @@
 const config = require("../../config");
-const TableClassId = require("../../data/TableClassId");
-//const TableExperience = require("../../data/TableExperience");
+const TableClassList = require("../../data/TableClassList");
+const TableExperience = require("../../data/TableExperience");
 const UserInfoType = require("../../enums/UserInfoType");
 const AbstractMaskPacket = require("./AbstractMaskPacket");
 const LOGGER = (new (require("../../logger/Logger"))("UserInfo"));
@@ -21,7 +21,7 @@ class UserInfo
 		this.swimWalkSpd = Math.round(this.cha.getSwimWalkSpeed() / this.moveMultiplier);
 		this.flyRunSpd = this.cha.isFlying() ? this.runSpd : 0;
 		this.flyWalkSpd = this.cha.isFlying() ? this.walkSpd : 0;
-		this.enchantLevel = 0x00;//this.cha.getInventory().getWeaponEnchant();
+		this.enchantLevel = this.cha.getInventory().getWeaponEnchant();
 		this.armorEnchant = 0x00;//this.cha.getInventory().getArmorMinEnchant();
 
 		this.title = cha.getTitle();
@@ -75,7 +75,7 @@ class UserInfo
 			packet.writeC(this.cha.isGM() ? 0x01 : 0x00);
 			packet.writeC(this.cha.getRace());
 			packet.writeC(this.cha.getSex());
-			packet.writeD(TableClassId.getRootClassId(this.cha.getClassId()));
+			packet.writeD(TableClassList.getRootClassById(this.cha.getClassId()).id);
 			packet.writeD(this.cha.getClassId());
 			packet.writeC(this.cha.getLevel());
 		}
@@ -109,7 +109,7 @@ class UserInfo
 			packet.writeD(Math.round(this.cha.getCp()));
 			packet.writeQ(this.cha.getSp());
 			packet.writeQ(this.cha.getExp());
-			packet.writeF(0.5);//(this.cha.getExp() - TableExperience.getExp(this.cha.getLevel())) / (TableExperience.getExp(this.cha.getLevel() + 1) - TableExperience.getExp(this.cha.getLevel())));
+			packet.writeF((this.cha.getExp() - TableExperience.getExp(this.cha.getLevel())) / (TableExperience.getExp(this.cha.getLevel() + 1) - TableExperience.getExp(this.cha.getLevel())));
 		}
 
 		if (this.contains(UserInfoType.ENCHANTLEVEL)) //ENCHANTLEVEL
@@ -218,7 +218,7 @@ class UserInfo
 			packet.writeD(this.cha.getClanId());
 			packet.writeD(this.cha.getClanCrestLargeId());
 			packet.writeD(this.cha.getClanCrestId());
-			packet.writeD(0x00);
+			packet.writeD(this.cha.getClanPrivileges());
 			packet.writeC(this.cha.isClanLeader() ? 0x01 : 0x00);
 			packet.writeD(this.cha.getAllyId());
 			packet.writeD(this.cha.getAllyCrestId());
@@ -242,17 +242,17 @@ class UserInfo
 		if (this.contains(UserInfoType.VITA_FAME))
 		{
 			packet.writeH(15);
-			packet.writeD(0x00);
+			packet.writeD(this.cha.getVitalityPoints());
 			packet.writeC(0x00); // Vita Bonus
-			packet.writeD(0x00);
-			packet.writeD(0x00);
+			packet.writeD(this.cha.getFame());
+			packet.writeD(this.cha.getRaidbossPoints());
 		}
 
 		if (this.contains(UserInfoType.SLOTS))
 		{
 			packet.writeH(9);
-			packet.writeC(0x00); // Confirmed
-			packet.writeC(0x00); // Confirmed
+			packet.writeC(this.cha.getInventory().getTalismanSlots()); // Confirmed
+			packet.writeC(this.cha.getInventory().getBroochJewelSlots()); // Confirmed
 			packet.writeC(0x00); // Confirmed
 			packet.writeC(0x03); // (1 = Red, 2 = White, 3 = White Pink) dotted ring on the floor
 			packet.writeC(0x00);

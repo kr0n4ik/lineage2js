@@ -1,7 +1,7 @@
 const Generator = require('../generator/generator');
 const TableBaseStats = require('./TableBaseStats');
 const TableInitialEquipment = require('./TableInitialEquipment');
-const TableClassId = require('./TableClassId');
+const TableClassList = require('./TableClassList');
 const LOGGER = (new (require("../logger/Logger"))("TableChar"));
 
 class TableChar
@@ -45,11 +45,13 @@ class TableChar
 	setRandomChar()
 	{
 
-		let classid = TableClassId.getRandomClass();
+		let classid = TableClassList.getRandomClass();
 
 		let stats = TableBaseStats.get(classid.id);
 
-		let inventory = TableInitialEquipment.get(classid.id);
+		let classbase = TableClassList.getRootClassById(classid.id);
+
+		let inventory = TableInitialEquipment.get(classbase.id);
 
 		let rndPosition = Math.round(Math.random() * (stats.staticData.creationPoints.length - 1));
 		
@@ -68,7 +70,7 @@ class TableChar
 			'sex': sex,
 			'race': classid.race,
 			'classid': classid.id,
-			'baseid': TableClassId.getRootClassId(classid.id),
+			'classbase': classbase.id,
 			'x': parseFloat(stats.staticData.creationPoints[rndPosition].x),
 			'y': parseFloat(stats.staticData.creationPoints[rndPosition].y),
 			'z': parseFloat(stats.staticData.creationPoints[rndPosition].z),

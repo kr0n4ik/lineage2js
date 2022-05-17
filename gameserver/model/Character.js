@@ -1,5 +1,6 @@
 const TableBaseStats = require("../data/TableBaseStats");
 const TableChar = require("../data/TableChar");
+const Inventory = require("./Inventory");
 
 const LOGGER = (new (require("../logger/Logger"))("Character"));
 
@@ -10,7 +11,7 @@ class Character {
 		this.sex = json.sex;
 		this.race = json.race;
 		this.classid = json.classid;
-		this.baseid = json.classid;
+		this.classbase = json.classbase;
 		this.x = json.x;
 		this.y = json.y;
 		this.z = json.z;
@@ -37,6 +38,7 @@ class Character {
 		this.isOnline = false;
 		this.isDead = false;
 		this.stats = TableBaseStats.get(this.classid);
+		this.inventory = new Inventory(json.inventory);
 	}
 
 	setOnlineStatus(isOnline, updateInDb) {
@@ -47,6 +49,10 @@ class Character {
 		if (updateInDb) {
 			TableChar.setOnlineStatus(this.id);
 		}
+	}
+
+	setIsDead(val) {
+		this.isDead = val;
 	}
 
 	setIsDead(val) {
@@ -460,6 +466,26 @@ class Character {
 
 	isTrueHero() {
 		return true;
+	}
+
+	getInventory() {
+		return this.inventory;
+	}
+
+	getClanPrivileges() {
+		return 0xFF;
+	}
+
+	getVitalityPoints() {
+		return this.vp;
+	}
+
+	getFame() {
+		return 0;
+	}
+
+	getRaidbossPoints() {
+		return 100;
 	}
 }
 module.exports = Character;
