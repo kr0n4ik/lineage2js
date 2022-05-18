@@ -2,7 +2,6 @@ const config = require("../../config");
 const TableClassList = require("../../data/TableClassList");
 const TableExperience = require("../../data/TableExperience");
 const UserInfoType = require("../../enums/UserInfoType");
-const AbstractMaskPacket = require("./AbstractMaskPacket");
 const LOGGER = (new (require("../../logger/Logger"))("UserInfo"));
 
 class UserInfo
@@ -14,13 +13,16 @@ class UserInfo
 		this.cha = cha;
 		this.size = 5;
 
+		this.flRunSpd = 1;
+		this.flWalkSpd = 2;
+
 		this.moveMultiplier = this.cha.getMovementSpeedMultiplier();
 		this.runSpd = Math.round(this.cha.getRunSpeed() / this.moveMultiplier);
 		this.walkSpd = Math.round(this.cha.getWalkSpeed() / this.moveMultiplier);
 		this.swimRunSpd = Math.round(this.cha.getSwimRunSpeed() / this.moveMultiplier);
 		this.swimWalkSpd = Math.round(this.cha.getSwimWalkSpeed() / this.moveMultiplier);
-		this.flyRunSpd = this.cha.isFlying() ? this.runSpd : 0;
-		this.flyWalkSpd = this.cha.isFlying() ? this.walkSpd : 0;
+		this.flyRunSpd = this.cha.isFlying() ? this.runSpd : 8;
+		this.flyWalkSpd = this.cha.isFlying() ? this.walkSpd : 9;
 		this.enchantLevel = this.cha.getInventory().getWeaponEnchant();
 		this.armorEnchant = 0x00;//this.cha.getInventory().getArmorMinEnchant();
 
@@ -61,8 +63,6 @@ class UserInfo
 		packet.writeH(23);
 		packet.writeB(this.masks);
 
-		
-
 		if (this.contains(UserInfoType.RELATION))
 		{
 			packet.writeD(0x00);
@@ -97,7 +97,7 @@ class UserInfo
 		{
 			packet.writeH(14);
 			packet.writeD(this.cha.getHP());
-			packet.writeD(this.cha.getMp());
+			packet.writeD(this.cha.getMP());
 			packet.writeD(this.cha.getCP());
 		}
 
@@ -131,10 +131,10 @@ class UserInfo
 		if (this.contains(UserInfoType.STATUS))
 		{
 			packet.writeH(6);
-			packet.writeC(5);
-			packet.writeC(5);
-			packet.writeC(1);
-			packet.writeC(0x00);
+			packet.writeC(22);
+			packet.writeC(33);
+			packet.writeC(44);
+			packet.writeC(55);
 		}
 
 		if (this.contains(UserInfoType.STATS)) 
@@ -159,12 +159,12 @@ class UserInfo
 		if (this.contains(UserInfoType.ELEMENTALS))
 		{
 			packet.writeH(14);
-			packet.writeH(0x00);
-			packet.writeH(0x00);
-			packet.writeH(0x00);
-			packet.writeH(0x00);
-			packet.writeH(0x00);
-			packet.writeH(0x00);
+			packet.writeH(0x01);
+			packet.writeH(0x02);
+			packet.writeH(0x03);
+			packet.writeH(0x04);
+			packet.writeH(0x05);
+			packet.writeH(0x06);
 		}
 
 		if (this.contains(UserInfoType.POSITION))
@@ -192,8 +192,8 @@ class UserInfo
 		if (this.contains(UserInfoType.MULTIPLIER))
 		{
 			packet.writeH(18);
-			packet.writeF(1.0);
-			packet.writeF(1.0);
+			packet.writeF(this.moveMultiplier);
+			packet.writeF(this.cha.getAttackSpeedMultiplier());
 		}
 
 		if (this.contains(UserInfoType.COL_RADIUS_HEIGHT))
@@ -205,9 +205,9 @@ class UserInfo
 
 		if (this.contains(UserInfoType.ATK_ELEMENTAL))
 		{
-			packet.writeH(10);
-			packet.writeD(this.moveMultiplier);
-			packet.writeD(this.cha.getAttackSpeedMultiplier());
+			packet.writeH(5);
+			packet.writeC(3);
+			packet.writeH(33);
 		}
 
 		if (this.contains(UserInfoType.CLAN))
@@ -254,7 +254,7 @@ class UserInfo
 			packet.writeC(this.cha.getInventory().getTalismanSlots()); // Confirmed
 			packet.writeC(this.cha.getInventory().getBroochJewelSlots()); // Confirmed
 			packet.writeC(0x00); // Confirmed
-			packet.writeC(0x03); // (1 = Red, 2 = White, 3 = White Pink) dotted ring on the floor
+			packet.writeC(0x00); // (1 = Red, 2 = White, 3 = White Pink) dotted ring on the floor
 			packet.writeC(0x00);
 			packet.writeC(0x00);
 			packet.writeC(0x00);
@@ -263,7 +263,7 @@ class UserInfo
 		if (this.contains(UserInfoType.MOVEMENTS))
 		{
 			packet.writeH(4);
-			packet.writeC(2);
+			packet.writeC(0);
 			packet.writeC(this.cha.isRunning() ? 0x01 : 0x00);
 		}
 

@@ -6,6 +6,7 @@ const LOGGER = (new (require("../logger/Logger"))("Character"));
 
 class Character {
 	constructor(json) {
+		this.flying = false;
 		this.id = json.id;
 		this.name = json.name;
 		this.sex = json.sex;
@@ -34,7 +35,7 @@ class Character {
 		this.last = json.last;
 		this.nobless = json.nobless;
 		this.access = json.access;
-		this.clanid = null;
+		this.clanid = 0;
 		this.isOnline = false;
 		this.isDead = false;
 		this.stats = TableBaseStats.get(this.classid);
@@ -148,7 +149,7 @@ class Character {
 	}
 
 	getClan() {
-		return null;
+		return "clan";
 	}
 
 	isGM() {
@@ -220,15 +221,15 @@ class Character {
 	}
 
 	getVisualHair() {
-		return 2;
+		return this.hair_style;
 	}
 
 	getVisualHairColor() {
-		return 0;
+		return this.hair_color;
 	}
 
 	getVisualFace() {
-		return 0;
+		return this.face;
 	}
 
 	isHairAccessoryEnabled() {
@@ -465,7 +466,7 @@ class Character {
 	}
 
 	isTrueHero() {
-		return true;
+		return false;
 	}
 
 	getInventory() {

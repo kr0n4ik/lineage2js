@@ -42,14 +42,14 @@ class TableChar
 	}
 	
 	
-	setRandomChar()
+	setRandomChar(account)
 	{
 
 		let classid = TableClassList.getRandomClass();
 
-		let stats = TableBaseStats.get(classid.id);
-
 		let classbase = TableClassList.getRootClassById(classid.id);
+
+		let stats = TableBaseStats.get(classid.id);
 
 		let inventory = TableInitialEquipment.get(classbase.id);
 
@@ -64,6 +64,7 @@ class TableChar
 		let sex = Math.round(Math.random());
 
 		this.characters.push({
+			'account': account,
 			'online' : false,
 			'id': Generator.getNextId(),
 			'name': "Tester-" + Math.round(Math.random() * 1000),
@@ -95,6 +96,7 @@ class TableChar
 			'access': Math.round(Math.random() * 1000),
 			'inventory': inventory
 		});
+		console.log(this.characters);
 	}
 }
 module.exports = new TableChar;

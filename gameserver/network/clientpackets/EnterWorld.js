@@ -5,6 +5,7 @@
 //const ExAdenaInvenCount = require("../serverpackets/ExAdenaInvenCount");
 //const ExUserInfoInvenWeight = require("../serverpackets/ExUserInfoInvenWeight");
 //const ExRotation = require("../serverpackets/ExRotation");
+const UserInfoType = require("../../enums/UserInfoType");
 const LOGGER = (new (require("../../logger/Logger"))("EnterWorld"));
 
 class EnterWorld 
@@ -55,7 +56,12 @@ class EnterWorld
 
 		// Send Macro List
 		//activeChar.getMacros().sendAllMacros();
-		
+
+
+		//let test = new UserInfo(activeChar, false);
+		//test.add(UserInfoType.BASIC_INFO);
+		//test.add(UserInfoType.POSITION);
+		//test.add(UserInfoType.CURRENT_HPMPCP_EXP_SP);
 		
 		client.write(new UserInfo(activeChar, true));
 		

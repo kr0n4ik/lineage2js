@@ -4,7 +4,6 @@ class Inventory
 {
 	constructor(json) 
 	{
-		console.log(json);
 		this.items = [];
 		for (let col of json) {
 			this.addItem(col.id, col.id, col.equipped, 5);

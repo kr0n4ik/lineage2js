@@ -1,7 +1,7 @@
 ﻿const config = require("../../config");
-//const Inventory = require("../../model/Inventory");
 const TableChar = require("../../data/TableChar");
-//const TableExperience = require("../../data/TableExperience");
+const TableExperience = require("../../data/TableExperience");
+const TableItems = require("../../data/TableItems");
 const LOGGER = (new (require("../../logger/Logger"))("CharSelectionInfo"));
 
 class CharSelectionInfo 
@@ -48,7 +48,7 @@ class CharSelectionInfo
 
 			packet.writeD(character.sex); // Sex
 			packet.writeD(character.race); // Race
-			packet.writeD((character.classid == character.baseid) ? character.classid : character.baseid);
+			packet.writeD((character.classid == character.classbase) ? character.classid : character.classbase);
 
 			packet.writeD(0x01); // GameServerName
 
@@ -59,7 +59,7 @@ class CharSelectionInfo
 			packet.writeF(character.mp);
 			packet.writeQ(character.sp);
 			packet.writeQ(character.exp);
-			packet.writeF(0.2); //packet.writeF((character.exp - TableExperience.getExp(character.level)) / (TableExperience.getExp(character.level + 1) - TableExperience.getExp(character.level)));
+			packet.writeF((character.exp - TableExperience.getExp(character.level)) / (TableExperience.getExp(character.level + 1) - TableExperience.getExp(character.level)));
 
 			packet.writeD(character.level);
 
@@ -78,7 +78,23 @@ class CharSelectionInfo
 			packet.writeD(0x00); // Ertheia
 			packet.writeD(0x00); // Ertheia
 
-			for (let i = 0; i < 42; ++i)
+			packet.writeD(this.getPaperdoll(character.inventory, "underwear"));
+			packet.writeD(this.getPaperdoll(character.inventory, "rear;lear"));
+			packet.writeD(this.getPaperdoll(character.inventory, "rear;lear"));
+			packet.writeD(this.getPaperdoll(character.inventory, "neck"));
+			packet.writeD(this.getPaperdoll(character.inventory, "rfinger;lfinger"));
+			packet.writeD(this.getPaperdoll(character.inventory, "rfinger;lfinger"));
+			packet.writeD(this.getPaperdoll(character.inventory, "head"));
+			packet.writeD(this.getPaperdoll(character.inventory, "rhand"));
+			packet.writeD(this.getPaperdoll(character.inventory, "lrhand"));
+			packet.writeD(this.getPaperdoll(character.inventory, "gloves"));
+			packet.writeD(this.getPaperdoll(character.inventory, "chest"));
+			packet.writeD(this.getPaperdoll(character.inventory, "legs"));
+			packet.writeD(this.getPaperdoll(character.inventory, "feet"));
+			packet.writeD(this.getPaperdoll(character.inventory, "cloak"));
+			packet.writeD(this.getPaperdoll(character.inventory, "rhand"));
+
+			for (let i = 0; i < 42-15; ++i)
 			{
 				let id = 0x00;
 				packet.writeD(id);
@@ -126,6 +142,18 @@ class CharSelectionInfo
 			//for (let i = 0; i < 1; i++)
 			//packet.writeC(0x00); // Show hair accessory if enabled
 		}
+	}
+
+	getPaperdoll(inventory, bodypart) {
+		for (let col of inventory) {
+			if (col.equipped == true) {
+				let item = TableItems.getItemById(col.id);
+				if (item.bodypart == bodypart) {
+					return col.id;
+				}
+			}
+		}
+		return 0x00;
 	}
 }
 module.exports = CharSelectionInfo;
