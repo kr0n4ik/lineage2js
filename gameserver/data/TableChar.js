@@ -10,10 +10,11 @@ class TableChar
 	constructor()
 	{
 		this.characters = [];
-
-		this.setRandomChar();
-		this.setRandomChar();
-		this.setRandomChar();
+		
+		for (let i = 0; i < 6; ++i)
+		{
+			this.setRandomChar();
+		}
 	}
 	
 	getCharById(id)
@@ -46,13 +47,11 @@ class TableChar
 	{
 
 		let classid = TableClassList.getRandomClass();
-
 		let classbase = TableClassList.getRootClassById(classid.id);
-
-		let stats = TableBaseStats.get(classid.id);
-
+		let stats = TableBaseStats.getStatsById(classid.id);
+		
 		let inventory = TableInitialEquipment.get(classbase.id);
-
+		
 		let rndPosition = Math.round(Math.random() * (stats.staticData.creationPoints.length - 1));
 		
 		let HP = stats.lvlUpgainData[1].hp;
@@ -62,7 +61,9 @@ class TableChar
 		let mp = Math.round(Math.random() * MP);
 		
 		let sex = Math.round(Math.random());
-
+		
+		let sp = Math.round(Math.random() * 1000);
+		
 		this.characters.push({
 			'account': account,
 			'online' : false,
@@ -75,28 +76,28 @@ class TableChar
 			'x': parseFloat(stats.staticData.creationPoints[rndPosition].x),
 			'y': parseFloat(stats.staticData.creationPoints[rndPosition].y),
 			'z': parseFloat(stats.staticData.creationPoints[rndPosition].z),
-			'level': 1, 
+			'level': 90, 
 			'hp': hp,
 			'HP': HP,
 			'mp': mp,
 			'MP': MP,
-			'sp': Math.round(Math.random() * 1000),
+			'sp': sp,
 			'exp': 9,
 			'karma': Math.round(Math.random() * 1000),
 			'pk': Math.round(Math.random() * 1000),
 			'pvp': Math.round(Math.random() * 1000),
 			'face': Math.round(Math.random() * 2),
-			'hair_style': Math.round(Math.random() * (sex == 0) ? 4 : 6), //дескриминация у мужского тоолько 4 причестки
+			'hair_style': Math.round(Math.random() * (sex == 0) ? 4 : 6),
 			'hair_color': Math.round(Math.random() * 3),
 			'vp': Math.round(Math.random() * 1000),
 			'cp': Math.round(Math.random() * 1000),
+			'CP': 1000,
 			'deletetime': 0,
 			'last': Date.now(),
 			'nobless': Math.round(Math.random() * 1000),
 			'access': Math.round(Math.random() * 1000),
 			'inventory': inventory
 		});
-		console.log(this.characters);
 	}
 }
 module.exports = new TableChar;

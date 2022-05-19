@@ -1,26 +1,20 @@
 const Item = require("./Item");
-const Paperdoll = require("../enums/Paperdoll");
-class Inventory
-{
-	constructor(json) 
-	{
+
+class Inventory {
+	constructor(json) {
 		this.items = [];
 		for (let col of json) {
-			this.addItem(col.id, col.id, col.equipped, 5);
+			let item = new Item(col.id, col.id, col.equipped, 5);
+			this.addItem(item);
 		}
 	}
 
-	addItem(gid, id, equ, loc) {
-		this.items.push(new Item(gid, id, equ, loc));
+	getItems() {
+		return this.items;
 	}
 
-	getWeaponEnchant() {
-		let item = this.getPaperdollItem(Paperdoll.PAPERDOLL_RHAND);
-		return item != null ? item.getEnchantLevel() : 0;
-	}
-
-	getPaperdollItem(id) {
-		return null;
+	addItem(item) {
+		this.items.push(item);
 	}
 
 	getTalismanSlots() {
@@ -29,6 +23,15 @@ class Inventory
 
 	getBroochJewelSlots() {
 		return 5;
+	}
+
+	getPaperdollItem(slot) {
+		for (let item of this.items) {
+			if (item.getSlot() == slot && item.isEquipped()) {
+				return item;
+			}
+		}
+		return null;
 	}
 }
 module.exports = Inventory;

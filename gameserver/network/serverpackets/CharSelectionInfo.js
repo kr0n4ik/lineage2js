@@ -82,22 +82,21 @@ class CharSelectionInfo
 			packet.writeD(this.getPaperdoll(character.inventory, "rear;lear"));
 			packet.writeD(this.getPaperdoll(character.inventory, "rear;lear"));
 			packet.writeD(this.getPaperdoll(character.inventory, "neck"));
-			packet.writeD(this.getPaperdoll(character.inventory, "rfinger;lfinger"));
-			packet.writeD(this.getPaperdoll(character.inventory, "rfinger;lfinger"));
+			packet.writeD(0x00);
+			packet.writeD(0x00);
 			packet.writeD(this.getPaperdoll(character.inventory, "head"));
 			packet.writeD(this.getPaperdoll(character.inventory, "rhand"));
-			packet.writeD(this.getPaperdoll(character.inventory, "lrhand"));
+			packet.writeD(this.getPaperdoll(character.inventory, "lhand"));
 			packet.writeD(this.getPaperdoll(character.inventory, "gloves"));
 			packet.writeD(this.getPaperdoll(character.inventory, "chest"));
 			packet.writeD(this.getPaperdoll(character.inventory, "legs"));
 			packet.writeD(this.getPaperdoll(character.inventory, "feet"));
 			packet.writeD(this.getPaperdoll(character.inventory, "cloak"));
 			packet.writeD(this.getPaperdoll(character.inventory, "rhand"));
-
-			for (let i = 0; i < 42-15; ++i)
+			
+			for (let i = 0; i < 42 - 15; ++i)
 			{
-				let id = 0x00;
-				packet.writeD(id);
+				packet.writeD(0x00);
 			}
 
 			packet.writeH(0x00); // Upper Body enchant level
@@ -137,10 +136,6 @@ class CharSelectionInfo
 			packet.writeC(character.nobless);
 			packet.writeC(0); // Hero glow
 			packet.writeC(0); // Show hair accessory if enabled
-
-			//packet.writeC(0); // Show hair accessory if enabled
-			//for (let i = 0; i < 1; i++)
-			//packet.writeC(0x00); // Show hair accessory if enabled
 		}
 	}
 

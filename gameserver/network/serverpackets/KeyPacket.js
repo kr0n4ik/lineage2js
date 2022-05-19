@@ -6,6 +6,7 @@ class KeyPacket
 		this.key = key;
 		this.result = result;
 	}
+
 	write(packet)
 	{
 		packet.writeC(0x2e);

@@ -140820,15 +140820,10 @@ const data = [
 		]
 	}
 ];
-module.exports = data;
 
 class TableBaseStats
 {
-	constructor()
-	{
-	}
-	
-	get(id)
+	getStatsById(id)
 	{
 		for (let col of data)
 		{

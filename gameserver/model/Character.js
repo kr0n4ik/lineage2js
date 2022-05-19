@@ -1,12 +1,10 @@
+const config = require("../config");
 const TableBaseStats = require("../data/TableBaseStats");
-const TableChar = require("../data/TableChar");
+const AttributeType = require("../enums/AttributeType");
 const Inventory = require("./Inventory");
-
-const LOGGER = (new (require("../logger/Logger"))("Character"));
 
 class Character {
 	constructor(json) {
-		this.flying = false;
 		this.id = json.id;
 		this.name = json.name;
 		this.sex = json.sex;
@@ -23,6 +21,7 @@ class Character {
 		this.MP = json.MP;
 		this.sp = json.sp;
 		this.cp = json.cp;
+		this.CP = 777;
 		this.exp = json.exp;
 		this.karma = json.karma;
 		this.pk = json.pk;
@@ -35,41 +34,38 @@ class Character {
 		this.last = json.last;
 		this.nobless = json.nobless;
 		this.access = json.access;
-		this.clanid = 0;
-		this.isOnline = false;
+		this.title = "test";
 		this.isDead = false;
-		this.stats = TableBaseStats.get(this.classid);
+		this.mountType = 0;
+		this.privateStoreType = 0;
+		this.crystallizeGrade = 0;
+		this.fistsWeaponItem = 6;
+		this.zones = [];
+		this.stats = TableBaseStats.getStatsById(this.classid);
 		this.inventory = new Inventory(json.inventory);
 	}
 
-	setOnlineStatus(isOnline, updateInDb) {
-		if (this.isOnline != isOnline) {
-			this.isOnline = isOnline;
-		}
-
-		if (updateInDb) {
-			TableChar.setOnlineStatus(this.id);
-		}
+	/*
+	 * имя
+	 */
+	getName() {
+		return this.name;
 	}
 
-	setIsDead(val) {
-		this.isDead = val;
+	getVisibleName() {
+		return this.getName();
 	}
 
-	setIsDead(val) {
-		this.isDead = val;
-	}
-
-	getClassId() {
-		return this.classid;
-	}
-
-	getClanId() {
-		return this.clanid;
+	getSex() {
+		return this.sex;
 	}
 
 	getRace() {
 		return this.race;
+	}
+
+	getClassId() {
+		return this.classid;
 	}
 
 	getX() {
@@ -84,36 +80,95 @@ class Character {
 		return this.z;
 	}
 
-	getSex() {
-		return this.sex;
+	getSp() {
+		return this.sp;
 	}
 
-	getName() {
-		return this.name;
+	getExp() {
+		return this.exp;
+	}
+
+	getLevel() {
+		return this.level;
 	}
 
 	getCharId() {
 		return this.id;
 	}
 
-	getTitle() {
-		return this.name;
+	getId() {
+		return this.id;
 	}
 
-	getReputation() {
-		return this.karma;
+	isChampion() {
+		return false;
 	}
 
-	getPkKills() {
-		return this.pk;
-	}
-
-	getPvpKills() {
-		return this.pvp;
+	isMonster() {
+		return false;
 	}
 
 	getLevel() {
-		return this.level;
+		return this.level
+	}
+
+	isAggressive() {
+		return true;
+	}
+
+	getTitle() {
+		// Champion titles
+		if (this.isChampion()) {
+			return config.champ_title;
+		}
+		// Custom level titles
+		if (config.show_npc_lvl && this.isMonster()) {
+			let t = "Lv " + getLevel() + this.isAggressive() ? "*" : "";
+			if (this.title != null) {
+				t += " " + this.title;
+			}
+			return t;
+		}
+		// Set trap title
+		//if (isTrap() && (((L2TrapInstance) this).getOwner() != null))
+		//{
+		//	_title = ((L2TrapInstance) this).getOwner().getName();
+	//	}
+		return this.title != null ? this.title : "";
+	}
+
+	isDead() {
+		return this.isDead;
+	}
+	
+	setIsDead(value) {
+		this.isDead = value;
+	}
+
+	getSTR() {
+		return 1;
+	}
+
+	getDEX() {
+		return 2;
+	}
+	getCON() {
+		return 3;
+	}
+	getINT() {
+		return 4;
+	}
+	getWIT() {
+		return 5;
+	}
+	getMEN() {
+		return 6;
+	}
+	getLUC() {
+		return 7;
+	}
+	getCHA() {
+		return 8;
 	}
 
 	getHP() {
@@ -124,6 +179,10 @@ class Character {
 		return this.MP;
 	}
 
+	getCP() {
+		return this.CP;
+	}
+
 	getHp() {
 		return this.hp;
 	}
@@ -132,68 +191,152 @@ class Character {
 		return this.mp;
 	}
 
-	getSp() {
-		return this.sp;
-	}
-
 	getCp() {
 		return this.cp;
 	}
 
-	getCP() {
-		return 2000;
+	getVisualHair() {
+		return this.hair_style;
 	}
 
-	getExp() {
-		return this.exp;
+	getVisualHairColor() {
+		return this.hair_color;
 	}
 
-	getClan() {
-		return "clan";
+	getVisualFace() {
+		return this.face;
 	}
 
-	isGM() {
+	isHairAccessoryEnabled() {
 		return false;
 	}
 
-	getVisibleName() {
-		return this.name;
+	/**
+	 * @return the type of Pet mounted (0 : none, 1 : Strider, 2 : Wyvern, 3: Wolf).
+	 */
+	getMountType() {
+		return this.mountType;
 	}
 
-	getSTR() {
-		return this.stats.staticData.str;
+	/**
+	 * <B><U> Values </U> :</B>
+	 * <li>0 : STORE_PRIVATE_NONE</li>
+	 * <li>1 : STORE_PRIVATE_SELL</li>
+	 * <li>2 : sellmanage</li><BR>
+	 * <li>3 : STORE_PRIVATE_BUY</li><BR>
+	 * <li>4 : buymanage</li><BR>
+	 * <li>5 : STORE_PRIVATE_MANUFACTURE</li><BR>
+	 * @return the Private Store type of the L2PcInstance.
+	 */
+	getPrivateStoreType() {
+		return this.privateStoreType;
 	}
 
-	getDEX() {
-		return this.stats.staticData.dex;
+	getCrystallizeGrade() {
+		return this.crystallizeGrade;
 	}
 
-	getCON() {
-		return this.stats.staticData.con;
+	getAbilityPoints() {
+		return Math.max(0, this.getLevel() - 84);
 	}
 
-	getINT() {
-		return this.stats.staticData.int;
+	getAbilityPointsUsed() {
+		return 0;//getVariables().getInt(isDualClassActive() ? PlayerVariables.ABILITY_POINTS_USED_DUAL_CLASS : PlayerVariables.ABILITY_POINTS_USED_MAIN_CLASS, 0);
 	}
 
-	getWIT() {
-		return this.stats.staticData.wit;
+	getActiveWeaponInstance() {
+		return null;//_inventory.getPaperdollItem(Inventory.PAPERDOLL_RHAND);
 	}
 
-	getMEN() {
-		return this.stats.staticData.men;
+	getActiveWeaponItem() {
+		let weapon = this.getActiveWeaponInstance();
+		if (weapon == null) {
+			return this.fistsWeaponItem;
+		}
+
+		return weapon.getItem();
 	}
 
-	getLUC() {
-		return 22;
+	getPAtk() {
+		return 345;
 	}
 
-	getCHA() {
-		return 22;
+	getPAtkSpd() {
+		return 777;
+	}
+
+	getPDef() {
+		return 555;
+	}
+
+	getEvasionRate() {
+		return 7;
+	}
+
+	getAccuracy() {
+		return 88;
+	}
+
+	getCriticalHit() {
+		return 99;
+	}
+
+	getMAtk() {
+		return 90;
+	}
+
+	getMAtkSpd() {
+		return 55;
+	}
+
+	getMagicEvasionRate() {
+		return 75;
+	}
+
+	getMDef() {
+		return 222;
+	}
+
+	getMagicAccuracy() {
+		return 54;
+	}
+
+	getMCriticalHit() {
+		return 324;
+	}
+
+	isRaid() {
+		return false;
+	}
+
+	getDefenseElementValue(defenseAttribute) {
+		switch (defenseAttribute) {
+			case AttributeType.FIRE: {
+					return 543;
+			}
+			case AttributeType.WATER: {
+					return 54;
+			}
+			case AttributeType.WIND: {
+					return 876;
+				}
+			case AttributeType.EARTH: {
+					return 456;
+				}
+			case AttributeType.HOLY: {
+					return 4356;
+				}
+			case AttributeType.DARK: {
+					return 456;
+				}
+			default: {
+					return 456;
+				}
+		}
 	}
 
 	getMovementSpeedMultiplier() {
-		return 1;
+		return 1.0;
 	}
 
 	getWalkSpeed() {
@@ -212,28 +355,8 @@ class Character {
 		return this.stats.staticData.baseMoveSpd.slowSwim;
 	}
 
-	isFlying() {
-		return this.flying;
-	}
-
-	isRunning() {
-		return true;
-	}
-
-	getVisualHair() {
-		return this.hair_style;
-	}
-
-	getVisualHairColor() {
-		return this.hair_color;
-	}
-
-	getVisualFace() {
-		return this.face;
-	}
-
-	isHairAccessoryEnabled() {
-		return true;
+	getAttackSpeedMultiplier() {
+		return 1.0;
 	}
 
 	getCollisionRadius() {
@@ -246,235 +369,8 @@ class Character {
 		return (sex == 1) ? this.stats.staticData.collisionFemale.height : this.stats.staticData.collisionMale.height;
 	}
 
-	getPAtk() {
-		return this.stats.staticData.basePAtk;
-	}
-
-	getPAtkSpd() {
-		return this.stats.staticData.basePAtkSpd;
-	}
-
-	getPDef() {
-		let chest = this.stats.staticData.basePDef.chest || 0;
-		let legs = this.stats.staticData.basePDef.legs || 0;
-		let head = this.stats.staticData.basePDef.head || 0;
-		let feet = this.stats.staticData.basePDef.feet || 0;
-		let gloves = this.stats.staticData.basePDef.gloves || 0;
-		let underwear = this.stats.staticData.basePDef.underwear || 0;
-		let cloak = this.stats.staticData.basePDef.cloak || 0;
-		let hair = this.stats.staticData.basePDef.hair || 0;
-		return chest + legs + head + feet + gloves + underwear + cloak + hair;
-	}
-
-	getEvasionRate() {
-		//Добавить оружие и провекрук
-		let level = this.getLevel();
-		let value = 0;
-		if (this.isPlayer) {
-			value += (Math.sqrt(this.getDEX()) * 5) + level;
-			if (level > 69) {
-				value += level - 69;
-			}
-			if (level > 77) {
-				value += 1;
-			}
-			if (level > 80) {
-				value += 2;
-			}
-			if (level > 87) {
-				value += 2;
-			}
-			if (level > 92) {
-				value += 1;
-			}
-			if (level > 97) {
-				value += 1;
-			}
-		}
-		else {
-			value += (Math.sqrt(this.getDEX()) * 5) + level;
-			if (level > 69) {
-				value += (level - 69) + 2;
-			}
-		}
-
-		return value;
-	}
-
-	getAccuracy() {
-		let value = 0;
-		let level = this.getLevel();
-		value += (Math.sqrt(this.getDEX()) * 5) + level;
-		if (level > 69) {
-			value += level - 69;
-		}
-		if (level > 77) {
-			value += 1;
-		}
-		if (level > 80) {
-			value += 2;
-		}
-		if (level > 87) {
-			value += 2;
-		}
-		if (level > 92) {
-			value += 1;
-		}
-		if (level > 97) {
-			value += 1;
-		}
-
-		if (this.isPlayer) {
-			// Enchanted gloves bonus
-			//baseValue += calcEnchantBodyPart(creature, L2Item.SLOT_GLOVES);
-		}
-
-		return value;
-	}
-
-	getCriticalHit() {
-		return 55;
-	}
-
-	getMAtk() {
-		return this.stats.staticData.baseMAtk;
-	}
-
-	getMAtkSpd() {
-		return this.stats.staticData.baseMAtkSpd;
-	}
-
-	getMagicEvasionRate() {
-		//добавть оружие и проверк плеер это или персонаж
-		let level = this.getLevel();
-		let value = 0;
-		value += (Math.sqrt(this.getWIT()) * 3) + (level * 2);
-		return value;
-	}
-
-	getMDef() {
-		let rear = this.stats.staticData.baseMDef.rear || 0;
-		let lear = this.stats.staticData.baseMDef.lear || 0;
-		let rfinger = this.stats.staticData.baseMDef.rfinger || 0;
-		let lfinger = this.stats.staticData.baseMDef.lfinger || 0;
-		let neck = this.stats.staticData.baseMDef.neck || 0;
-		return rear + lear + rfinger + lfinger + neck;
-	}
-
-	getMagicAccuracy() {
-		let value = 0;
-		if (this.isPlayer) {
-			// Enchanted gloves bonus
-			//baseValue += calcEnchantBodyPart(creature, L2Item.SLOT_GLOVES);
-		}
-
-		value += (Math.sqrt(this.getWIT()) * 3) + (this.getLevel() * 2)
-
-		return value;
-	}
-
-	getMCriticalHit() {
-		return 33;
-	}
-
-	getAdena() {
-		return 34545;
-	}
-
-	getCurrentLoad() {
-		let weight = 0;
-		//for (let item of this.inventory.items) {
-		//	weight += item.item.weight || 0;
-		//}
-		return weight;
-	}
-
-	getMaxLoad() {
-		return 100 * 6900;//Math.floor(BaseStats.CON.calcBonus(this) * 69000 * Config.ALT_WEIGHT_LIMIT);;
-	}
-
-	isInventoryDisabled() {
-		return false;
-	}
-
-	getActiveWeaponItem() {
-		return null;
-	}
-
-	getAttackSpeedMultiplier() {
-		return 10;
-	}
-
-	getPledgeType() {
+	getAttackElement() {
 		return 0;
-	}
-
-	getClanCrestLargeId() {
-		return 0;
-	}
-
-	getClanCrestId() {
-		return 0;
-	}
-
-	isClanLeader() {
-		return true;
-	}
-
-	getAllyId() {
-		return 0;
-	}
-
-	getAllyCrestId() {
-		return 0;
-	}
-
-	isInMatchingRoom() {
-		return false;
-	}
-
-	getPvpFlag() {
-		return 0;
-	}
-
-	isHero() {
-		return true;
-	}
-
-	getPledgeClass() {
-		return 0;
-	}
-
-	getRecomLeft() {
-		return 0;
-	}
-
-	getRecomHave() {
-		return 0;
-	}
-
-	getNameColor() {
-		return 3453;
-	}
-
-	getTitleColor() {
-		return 3453;
-	}
-
-	getInventoryLimit() {
-		return 500;
-	}
-
-	isTrueHero() {
-		return false;
-	}
-
-	getInventory() {
-		return this.inventory;
-	}
-
-	getClanPrivileges() {
-		return 0xFF;
 	}
 
 	getVitalityPoints() {
@@ -488,5 +384,42 @@ class Character {
 	getRaidbossPoints() {
 		return 100;
 	}
+
+	getNameColor() {
+		return 3453678;
+	}
+
+	getTitleColor() {
+		return 3453;
+	}
+
+	getInventory() {
+		return this.inventory;
+	}
+
+	getInventoryLimit() {
+		return 555;
+	}
+
+	isInVehicle() {
+		return false;
+	}
+
+	isRunning() {
+		return false;
+	}
+
+	isFlying() {
+		return false;
+	}
+
+	isFlyingMounted() {
+		return false;
+	}
+
+	isInsideZone(zone) {
+		this.zones[zone] > 0;
+	}
 }
+
 module.exports = Character;

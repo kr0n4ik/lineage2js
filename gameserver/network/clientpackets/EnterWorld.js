@@ -6,6 +6,8 @@
 //const ExUserInfoInvenWeight = require("../serverpackets/ExUserInfoInvenWeight");
 //const ExRotation = require("../serverpackets/ExRotation");
 const UserInfoType = require("../../enums/UserInfoType");
+const ExUserInfoEquipSlot = require("../serverpackets/ExUserInfoEquipSlot");
+const ItemList = require("../serverpackets/ItemList");
 const LOGGER = (new (require("../../logger/Logger"))("EnterWorld"));
 
 class EnterWorld 
@@ -58,21 +60,30 @@ class EnterWorld
 		//activeChar.getMacros().sendAllMacros();
 
 
-		//let test = new UserInfo(activeChar, false);
-		//test.add(UserInfoType.BASIC_INFO);
-		//test.add(UserInfoType.POSITION);
-		//test.add(UserInfoType.CURRENT_HPMPCP_EXP_SP);
+		/*let test = new UserInfo(activeChar, false);
+		test.add(UserInfoType.RELATION);
+		test.add(UserInfoType.BASIC_INFO);
+		test.add(UserInfoType.BASE_STATS);
+		test.add(UserInfoType.MAX_HPCPMP);
+		test.add(UserInfoType.CURRENT_HPMPCP_EXP_SP);
+		test.add(UserInfoType.ENCHANTLEVEL);
+		test.add(UserInfoType.APPAREANCE);
+		test.add(UserInfoType.STATS);
+		test.add(UserInfoType.STATUS);
+		test.add(UserInfoType.ELEMENTALS);
+		test.add(UserInfoType.POSITION);
+		client.write(test);
+		*/
 		
 		client.write(new UserInfo(activeChar, true));
-		
-		//client.write(new ItemList(activeChar, false));
+
+		client.write(new ItemList(activeChar, false));
 		
 		//client.write(new ExAdenaInvenCount(activeChar));
 		
 		//client.write(new ExUserInfoInvenWeight(activeChar));
 		
-		//client.write(new ExUserInfoEquipSlot(activeChar));
-		
+		client.write(new ExUserInfoEquipSlot(activeChar, true));
 		
 		//client.write(new ExRotation(activeChar.getCharId(), activeChar.getHeading()));
 	}

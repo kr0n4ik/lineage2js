@@ -360,12 +360,9 @@ let data = [
 		]
 	}
 ];
-class TableInitialEquipment {
-	constructor() {
-	}
-
+class TableInitialEquipment
+{
 	get(id) {
-		console.log(id);
 		for (let col of data) {
 			if (col.classid == id) {
 				return col.equipment;

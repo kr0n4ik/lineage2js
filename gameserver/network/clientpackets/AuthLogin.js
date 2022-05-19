@@ -25,7 +25,9 @@ class AuthLogin
 			client.write(new LoginResult(-1, LoginResult.NO_TEXT));
 			client.write(new CharSelectionInfo(client.getAccountName(), client.getSession()));
 			
-		} else {
+		}
+		else
+		{
 			client.close();
 		}
 	}

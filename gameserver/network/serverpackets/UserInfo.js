@@ -1,6 +1,9 @@
 const config = require("../../config");
 const TableClassList = require("../../data/TableClassList");
 const TableExperience = require("../../data/TableExperience");
+const ItemGrade = require("../../enums/ItemGrade");
+const ZoneId = require("../../enums/ZoneId");
+const AttributeType = require("../../enums/AttributeType");
 const UserInfoType = require("../../enums/UserInfoType");
 const LOGGER = (new (require("../../logger/Logger"))("UserInfo"));
 
@@ -10,21 +13,21 @@ class UserInfo
 	{
 		this.code = [0x80,0x40,0x20,0x10,0x08,0x04,0x02,0x01];
 		this.masks = [0x00, 0x00, 0x00];
-		this.cha = cha;
+		this.activeChar = cha;
 		this.size = 5;
 
 		this.flRunSpd = 1;
 		this.flWalkSpd = 2;
 
-		this.moveMultiplier = this.cha.getMovementSpeedMultiplier();
-		this.runSpd = Math.round(this.cha.getRunSpeed() / this.moveMultiplier);
-		this.walkSpd = Math.round(this.cha.getWalkSpeed() / this.moveMultiplier);
-		this.swimRunSpd = Math.round(this.cha.getSwimRunSpeed() / this.moveMultiplier);
-		this.swimWalkSpd = Math.round(this.cha.getSwimWalkSpeed() / this.moveMultiplier);
-		this.flyRunSpd = this.cha.isFlying() ? this.runSpd : 8;
-		this.flyWalkSpd = this.cha.isFlying() ? this.walkSpd : 9;
-		this.enchantLevel = this.cha.getInventory().getWeaponEnchant();
-		this.armorEnchant = 0x00;//this.cha.getInventory().getArmorMinEnchant();
+		this.moveMultiplier = this.activeChar.getMovementSpeedMultiplier();
+		this.runSpd = Math.round(this.activeChar.getRunSpeed() / this.moveMultiplier);
+		this.walkSpd = Math.round(this.activeChar.getWalkSpeed() / this.moveMultiplier);
+		this.swimRunSpd = Math.round(this.activeChar.getSwimRunSpeed() / this.moveMultiplier);
+		this.swimWalkSpd = Math.round(this.activeChar.getSwimWalkSpeed() / this.moveMultiplier);
+		this.flyRunSpd = this.activeChar.isFlying() ? this.runSpd : 8;
+		this.flyWalkSpd = this.activeChar.isFlying() ? this.walkSpd : 9;
+		this.enchantLevel = 0x00;//this.activeChar.getInventory().getWeaponEnchant();
+		this.armorEnchant = 0x00;//this.activeChar.getInventory().getArmorMinEnchant();
 
 		this.title = cha.getTitle();
 
@@ -43,7 +46,7 @@ class UserInfo
 		switch (data.id) {
 			case UserInfoType.BASIC_INFO.id:
 				{
-					this.size += (this.cha.getVisibleName().length * 2);
+					this.size += (this.activeChar.getVisibleName().length * 2);
 					break;
 				}
 			case UserInfoType.CLAN.id:
@@ -58,7 +61,7 @@ class UserInfo
 
 	write(packet) {
 		packet.writeC(0x32);
-		packet.writeD(this.cha.getCharId());
+		packet.writeD(this.activeChar.getId());
 		packet.writeD(this.size);
 		packet.writeH(23);
 		packet.writeB(this.masks);
@@ -70,114 +73,106 @@ class UserInfo
 
 		if (this.contains(UserInfoType.BASIC_INFO))
 		{
-			packet.writeH(16 + (this.cha.getVisibleName().length * 2));
-			packet.writeT(this.cha.getVisibleName());
-			packet.writeC(this.cha.isGM() ? 0x01 : 0x00);
-			packet.writeC(this.cha.getRace());
-			packet.writeC(this.cha.getSex());
-			packet.writeD(TableClassList.getRootClassById(this.cha.getClassId()).id);
-			packet.writeD(this.cha.getClassId());
-			packet.writeC(this.cha.getLevel());
+			packet.writeH(16 + (this.activeChar.getVisibleName().length * 2));
+			packet.writeT(this.activeChar.getVisibleName());
+			packet.writeC(this.activeChar.isGM() ? 0x01 : 0x00);
+			packet.writeC(this.activeChar.getRace());
+			packet.writeC(this.activeChar.getSex());
+			packet.writeD(TableClassList.getRootClassById(this.activeChar.getClassId()).id);
+			packet.writeD(this.activeChar.getClassId());
+			packet.writeC(this.activeChar.getLevel());
 		}
 
-		if (this.contains(UserInfoType.BASE_STATS))
-		{
+		if (this.contains(UserInfoType.BASE_STATS)) {
 			packet.writeH(18);
-			packet.writeH(this.cha.getSTR());
-			packet.writeH(this.cha.getDEX());
-			packet.writeH(this.cha.getCON());
-			packet.writeH(this.cha.getINT());
-			packet.writeH(this.cha.getWIT());
-			packet.writeH(this.cha.getMEN());
-			packet.writeH(this.cha.getLUC());
-			packet.writeH(this.cha.getCHA());
+			packet.writeH(this.activeChar.getSTR());
+			packet.writeH(this.activeChar.getDEX());
+			packet.writeH(this.activeChar.getCON());
+			packet.writeH(this.activeChar.getINT());
+			packet.writeH(this.activeChar.getWIT());
+			packet.writeH(this.activeChar.getMEN());
+			packet.writeH(this.activeChar.getLUC());
+			packet.writeH(this.activeChar.getCHA());
 		}
 
 		if (this.contains(UserInfoType.MAX_HPCPMP)) //MAX_HPCPMP
 		{
 			packet.writeH(14);
-			packet.writeD(this.cha.getHP());
-			packet.writeD(this.cha.getMP());
-			packet.writeD(this.cha.getCP());
+			packet.writeD(this.activeChar.getHP());
+			packet.writeD(this.activeChar.getMP());
+			packet.writeD(this.activeChar.getCP());
 		}
 
-		if (this.contains(UserInfoType.CURRENT_HPMPCP_EXP_SP))
-		{
+		if (this.contains(UserInfoType.CURRENT_HPMPCP_EXP_SP)) {
 			packet.writeH(38);
-			packet.writeD(Math.round(this.cha.getHp()));
-			packet.writeD(Math.round(this.cha.getMp()));
-			packet.writeD(Math.round(this.cha.getCp()));
-			packet.writeQ(this.cha.getSp());
-			packet.writeQ(this.cha.getExp());
-			packet.writeF((this.cha.getExp() - TableExperience.getExp(this.cha.getLevel())) / (TableExperience.getExp(this.cha.getLevel() + 1) - TableExperience.getExp(this.cha.getLevel())));
+			packet.writeD(Math.round(this.activeChar.getHp()));
+			packet.writeD(Math.round(this.activeChar.getMp()));
+			packet.writeD(Math.round(this.activeChar.getCp()));
+			packet.writeQ(this.activeChar.getSp());
+			packet.writeQ(this.activeChar.getExp());
+			packet.writeF((this.activeChar.getExp() - TableExperience.getExp(this.activeChar.getLevel())) / (TableExperience.getExp(this.activeChar.getLevel() + 1) - TableExperience.getExp(this.activeChar.getLevel())));
 		}
 
-		if (this.contains(UserInfoType.ENCHANTLEVEL)) //ENCHANTLEVEL
-		{
+		if (this.contains(UserInfoType.ENCHANTLEVEL)) {
 			packet.writeH(4);
 			packet.writeC(this.enchantLevel);
 			packet.writeC(this.armorEnchant);
 		}
 
-		if (this.contains(UserInfoType.APPAREANCE))
-		{
+		if (this.contains(UserInfoType.APPAREANCE)) {
 			packet.writeH(15);
-			packet.writeD(this.cha.getVisualHair());
-			packet.writeD(this.cha.getVisualHairColor());
-			packet.writeD(this.cha.getVisualFace());
-			packet.writeC(this.cha.isHairAccessoryEnabled() ? 0x01 : 0x00);
+			packet.writeD(this.activeChar.getVisualHair());
+			packet.writeD(this.activeChar.getVisualHairColor());
+			packet.writeD(this.activeChar.getVisualFace());
+			packet.writeC(this.activeChar.isHairAccessoryEnabled() ? 0x01 : 0x00);
+			console.log(this.activeChar.getVisualHairColor());
 		}
 
-		if (this.contains(UserInfoType.STATUS))
-		{
+		if (this.contains(UserInfoType.STATUS)) {
 			packet.writeH(6);
-			packet.writeC(22);
-			packet.writeC(33);
-			packet.writeC(44);
-			packet.writeC(55);
+			packet.writeC(this.activeChar.getMountType());
+			packet.writeC(this.activeChar.getPrivateStoreType());
+			packet.writeC(this.activeChar.getCrystallizeGrade() != ItemGrade.NONE ? 1 : 0);
+			packet.writeC(this.activeChar.getAbilityPoints() - this.activeChar.getAbilityPointsUsed());
 		}
 
-		if (this.contains(UserInfoType.STATS)) 
-		{
+		if (this.contains(UserInfoType.STATS)) {
 			packet.writeH(56);
-			packet.writeH(this.cha.getActiveWeaponItem() != null ? 40 : 20);
-			packet.writeD(this.cha.getPAtk());
-			packet.writeD(this.cha.getPAtkSpd());
-			packet.writeD(this.cha.getPDef());
-			packet.writeD(this.cha.getEvasionRate());
-			packet.writeD(this.cha.getAccuracy());
-			packet.writeD(this.cha.getCriticalHit());
-			packet.writeD(this.cha.getMAtk());
-			packet.writeD(this.cha.getMAtkSpd());
-			packet.writeD(this.cha.getPAtkSpd());
-			packet.writeD(this.cha.getMagicEvasionRate());
-			packet.writeD(this.cha.getMDef());
-			packet.writeD(this.cha.getMagicAccuracy());
-			packet.writeD(this.cha.getMCriticalHit());
+			packet.writeH(this.activeChar.getActiveWeaponItem() != null ? 40 : 20);
+			packet.writeD(this.activeChar.getPAtk());
+			packet.writeD(this.activeChar.getPAtkSpd());
+			packet.writeD(this.activeChar.getPDef());
+			packet.writeD(this.activeChar.getEvasionRate());
+			packet.writeD(this.activeChar.getAccuracy());
+			packet.writeD(this.activeChar.getCriticalHit());
+			packet.writeD(this.activeChar.getMAtk());
+			packet.writeD(this.activeChar.getMAtkSpd());
+			packet.writeD(this.activeChar.getPAtkSpd()); // Seems like atk speed - 1
+			packet.writeD(this.activeChar.getMagicEvasionRate());
+			packet.writeD(this.activeChar.getMDef());
+			packet.writeD(this.activeChar.getMagicAccuracy());
+			packet.writeD(this.activeChar.getMCriticalHit());
 		}
 
-		if (this.contains(UserInfoType.ELEMENTALS))
-		{
+		if (this.contains(UserInfoType.ELEMENTALS)) {
 			packet.writeH(14);
-			packet.writeH(0x01);
-			packet.writeH(0x02);
-			packet.writeH(0x03);
-			packet.writeH(0x04);
-			packet.writeH(0x05);
-			packet.writeH(0x06);
+			packet.writeH(this.activeChar.getDefenseElementValue( AttributeType.FIRE));
+			packet.writeH(this.activeChar.getDefenseElementValue(AttributeType.WATER));
+			packet.writeH(this.activeChar.getDefenseElementValue(AttributeType.WIND));
+			packet.writeH(this.activeChar.getDefenseElementValue(AttributeType.EARTH));
+			packet.writeH(this.activeChar.getDefenseElementValue(AttributeType.HOLY));
+			packet.writeH(this.activeChar.getDefenseElementValue(AttributeType.DARK));
 		}
 
-		if (this.contains(UserInfoType.POSITION))
-		{
+		if (this.contains(UserInfoType.POSITION)) {
 			packet.writeH(18);
-			packet.writeD(this.cha.getX());
-			packet.writeD(this.cha.getY());
-			packet.writeD(this.cha.getZ());
-			packet.writeD(0);
+			packet.writeD(this.activeChar.getX());
+			packet.writeD(this.activeChar.getY());
+			packet.writeD(this.activeChar.getZ());
+			packet.writeD(this.activeChar.isInVehicle() ? this.activeChar.getVehicle().getObjectId() : 0);
 		}
 
-		if (this.contains(UserInfoType.SPEED))
-		{
+		if (this.contains(UserInfoType.SPEED)) {
 			packet.writeH(18);
 			packet.writeH(this.runSpd);
 			packet.writeH(this.walkSpd);
@@ -189,108 +184,99 @@ class UserInfo
 			packet.writeH(this.flyWalkSpd);
 		}
 
-		if (this.contains(UserInfoType.MULTIPLIER))
-		{
+		if (this.contains(UserInfoType.MULTIPLIER)) {
 			packet.writeH(18);
 			packet.writeF(this.moveMultiplier);
-			packet.writeF(this.cha.getAttackSpeedMultiplier());
+			packet.writeF(this.activeChar.getAttackSpeedMultiplier());
 		}
 
-		if (this.contains(UserInfoType.COL_RADIUS_HEIGHT))
-		{
+		if (this.contains(UserInfoType.COL_RADIUS_HEIGHT)) {
 			packet.writeH(18);
-			packet.writeF(this.cha.getCollisionRadius());
-			packet.writeF(this.cha.getCollisionHeight());
+			packet.writeF(this.activeChar.getCollisionRadius());
+			packet.writeF(this.activeChar.getCollisionHeight());
 		}
 
-		if (this.contains(UserInfoType.ATK_ELEMENTAL))
-		{
+		if (this.contains(UserInfoType.ATK_ELEMENTAL)) {
 			packet.writeH(5);
-			packet.writeC(3);
-			packet.writeH(33);
+			let attackAttribute = this.activeChar.getAttackElement();
+			packet.writeC(0);
+			packet.writeH(0);
 		}
 
-		if (this.contains(UserInfoType.CLAN))
-		{
+		if (this.contains(UserInfoType.CLAN)) {
 			packet.writeH(32 + (this.title.length * 2));
 			packet.writeT(this.title);
-			packet.writeH(this.cha.getPledgeType());
-			packet.writeD(this.cha.getClanId());
-			packet.writeD(this.cha.getClanCrestLargeId());
-			packet.writeD(this.cha.getClanCrestId());
-			packet.writeD(this.cha.getClanPrivileges());
-			packet.writeC(this.cha.isClanLeader() ? 0x01 : 0x00);
-			packet.writeD(this.cha.getAllyId());
-			packet.writeD(this.cha.getAllyCrestId());
-			packet.writeC(this.cha.isInMatchingRoom() ? 0x01 : 0x00);
+			packet.writeH(this.activeChar.getPledgeType());
+			packet.writeD(this.activeChar.getClanId());
+			packet.writeD(this.activeChar.getClanCrestLargeId());
+			packet.writeD(this.activeChar.getClanCrestId());
+			packet.writeD(this.activeChar.getClanPrivileges());
+			packet.writeC(this.activeChar.isClanLeader() ? 0x01 : 0x00);
+			packet.writeD(this.activeChar.getAllyId());
+			packet.writeD(this.activeChar.getAllyCrestId());
+			packet.writeC(this.activeChar.isInMatchingRoom() ? 0x01 : 0x00);
 		}
 
-		if (this.contains(UserInfoType.SOCIAL))
-		{
+		if (this.contains(UserInfoType.SOCIAL)) {
 			packet.writeH(22);
-			packet.writeC(this.cha.getPvpFlag());
-			packet.writeD(this.cha.getReputation()); // Reputation
-			packet.writeC(0x00);
-			packet.writeC(this.cha.isHero() || (this.cha.isGM() && config.gm_hero_aura) ? 1 : 0);
-			packet.writeC(this.cha.getPledgeClass());
-			packet.writeD(this.cha.getPkKills());
-			packet.writeD(this.cha.getPvpKills());
-			packet.writeH(this.cha.getRecomLeft());
-			packet.writeH(this.cha.getRecomHave());
+			packet.writeC(this.activeChar.getPvpFlag());
+			packet.writeD(this.activeChar.getReputation()); // Reputation
+			packet.writeC(this.activeChar.getNobleLevel());
+			packet.writeC(this.activeChar.isHero() || (this.activeChar.isGM() && config.gm_hero_aura) ? 1 : 0);
+			packet.writeC(this.activeChar.getPledgeClass());
+			packet.writeD(this.activeChar.getPkKills());
+			packet.writeD(this.activeChar.getPvpKills());
+			packet.writeH(this.activeChar.getRecomLeft());
+			packet.writeH(this.activeChar.getRecomHave());
 		}
 
-		if (this.contains(UserInfoType.VITA_FAME))
-		{
+		if (this.contains(UserInfoType.VITA_FAME)) {
 			packet.writeH(15);
-			packet.writeD(this.cha.getVitalityPoints());
+			packet.writeD(this.activeChar.getVitalityPoints());
 			packet.writeC(0x00); // Vita Bonus
-			packet.writeD(this.cha.getFame());
-			packet.writeD(this.cha.getRaidbossPoints());
+			packet.writeD(this.activeChar.getFame());
+			packet.writeD(this.activeChar.getRaidbossPoints());
 		}
 
-		if (this.contains(UserInfoType.SLOTS))
-		{
+		if (this.contains(UserInfoType.SLOTS)) {
 			packet.writeH(9);
-			packet.writeC(this.cha.getInventory().getTalismanSlots()); // Confirmed
-			packet.writeC(this.cha.getInventory().getBroochJewelSlots()); // Confirmed
-			packet.writeC(0x00); // Confirmed
+			packet.writeC(this.activeChar.getInventory().getTalismanSlots()); // Confirmed
+			packet.writeC(this.activeChar.getInventory().getBroochJewelSlots()); // Confirmed
+			packet.writeC(this.activeChar.getTeam()); // Confirmed
 			packet.writeC(0x00); // (1 = Red, 2 = White, 3 = White Pink) dotted ring on the floor
 			packet.writeC(0x00);
 			packet.writeC(0x00);
 			packet.writeC(0x00);
 		}
 
-		if (this.contains(UserInfoType.MOVEMENTS))
-		{
+		if (this.contains(UserInfoType.MOVEMENTS)) {
 			packet.writeH(4);
-			packet.writeC(0);
-			packet.writeC(this.cha.isRunning() ? 0x01 : 0x00);
+			packet.writeC(this.activeChar.isInsideZone(ZoneId.WATER) ? 1 : this.activeChar.isFlyingMounted() ? 2 : 0);
+			packet.writeC(this.activeChar.isRunning() ? 0x01 : 0x00);
 		}
 
-		if (this.contains(UserInfoType.COLOR))
-		{
+		if (this.contains(UserInfoType.COLOR)) {
 			packet.writeH(10);
-			packet.writeD(this.cha.getNameColor());
-			packet.writeD(this.cha.getTitleColor());
+			packet.writeD(this.activeChar.getNameColor());
+			packet.writeD(this.activeChar.getTitleColor());
 		}
 
-		if (this.contains(UserInfoType.INVENTORY_LIMIT))
-		{
+		if (this.contains(UserInfoType.INVENTORY_LIMIT)) {
 			packet.writeH(9);
 			packet.writeH(0x00);
 			packet.writeH(0x00);
-			packet.writeH(this.cha.getInventoryLimit());
-			packet.writeC(0);
+			packet.writeH(this.activeChar.getInventoryLimit());
+			packet.writeC(0);//_activeChar.isCursedWeaponEquipped() ? CursedWeaponsManager.getInstance().getLevel(_activeChar.getCursedWeaponEquippedId()) : 0);
 		}
 
-		if (this.contains(UserInfoType.TRUE_HERO))
-		{
+		if (this.contains(UserInfoType.TRUE_HERO)) {
 			packet.writeH(9);
 			packet.writeD(0x00);
 			packet.writeH(0x00);
-			packet.writeC(this.cha.isTrueHero() ? 100 : 0x00);
+			packet.writeC(this.activeChar.isTrueHero() ? 100 : 0x00);
 		}
 	}
+
 
 	contains(data) {
 		return (this.masks[data.mask >> 3] & this.code[data.mask & 7]) != 0;

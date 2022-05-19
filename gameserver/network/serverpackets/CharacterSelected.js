@@ -1,4 +1,4 @@
-class CharacterSelected 
+class CharacterSelected
 {
 	constructor(cha, session) 
 	{

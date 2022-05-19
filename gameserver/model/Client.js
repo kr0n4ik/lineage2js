@@ -1,10 +1,11 @@
 const fs = require("fs");
-const Crypt = require("./crypt");
+const Crypt = require("../crypt/Crypt");
+const TableChar = require("../data/TableChar");
 const BaseRecievePacket = require("../network/BaseRecievePacket");
 const BaseSendablePacket = require("../network/BaseSendablePacket");
 const IncomingPackets = require("../network/IncomingPackets");
-const TableChar = require("../data/TableChar");
-const Character = require("./Character");
+const ConnectionState = require("../enums/ConnectionState");
+const Player = require("./Player");
 const LOGGER = (new (require("../logger/Logger"))("Client"));
 
 class Client
@@ -13,11 +14,13 @@ class Client
 	{
 		this.crypt = new Crypt();
 		this.socket = socket;
-		this.activeChar = null;
+		this.connectionState = ConnectionState.CONNECTED;
 		this.protocol = false;
 		this.key = null;
+		this.accountName = null;
 		this.session = null;
-		this.tracert = null;
+		this.activeChar = null;
+		this.trace = null;
 	}
 	
 	read(buffer)
@@ -47,13 +50,20 @@ class Client
 			return;
 		}
 		//try {
-		(new (require("../network/clientpackets/" + IncomingPackets[opcode].packet))()).run(this, packet);
+			//if (IncomingPackets[opcode].state == this.connectionState)
+			//{
+				(new (require("../network/clientpackets/" + IncomingPackets[opcode].packet))()).run(this, packet);
+			//} 
+			//else 
+			//{
+			///	LOGGER.error("Error state: " + this.connectionState + " 0x" + ("0" + opcode.toString(16)).substr(-2) + " " + (IncomingPackets[opcode].packet).green);
+			//}
 		//} catch(err) {
 			//console.log(err);
 		//}
 	}
 	
-	write(block) 
+	write(block)
 	{
 		let packet = new BaseSendablePacket();
 		block.write(packet);
@@ -67,75 +77,50 @@ class Client
 		buffer[1] = (buffer.length >> 8) & 0xFF;
 		this.socket.write(buffer);
 	}
-
-	setClientTracert(val) {
-		this.tracert = val;
-	}
 	
-	isProtocolOk() 
-	{
+	setConnectionState(connectionState){
+		this.connectionState = connectionState;
+	}
+
+	setProtocolOk(protocol) {
+		this.protocol = protocol;
+	}
+
+	isProtocolOk() {
 		return this.protocol;
 	}
-	
-	setProtocolOk(val) 
-	{
-		this.protocol = val;
-	}
-	
-	enableCrypt() 
-	{
+
+	enableCrypt() {
 		this.key = this.crypt.key();
 		return this.key;
 	}
-	
-	getAccountName()
-	{
+
+	getAccountName() {
 		return this.accountName;
 	}
-	
-	setAccountName(val)
-	{
-		this.accountName = val;
+
+	setAccountName(accountName) {
+		this.accountName = accountName;
 	}
-	
-	getSession()
-	{
+
+	getSession() {
 		return this.session;
 	}
-	
-	setSession(val) 
-	{
-		this.session = val;
+
+	setSession(session) {
+		this.session = session;
 	}
-	
-	getActiveChar()
-	{
+
+	getActiveChar() {
 		return this.activeChar;
 	}
-	
-	setActiveChar(activeChar)
-	{
+
+	setActiveChar(activeChar) {
 		this.activeChar = activeChar;
 	}
 
-	setState(val) {
-		this.state = val;
-	}
-	
-	close(block = null) 
-	{
-		if (block != null)
-		{
-			this.write(block);
-		}
-		if (this.socket != null) 
-		{
-			this.socket.end();
-		}
-	}
-
-	getParty() {
-		return null;
+	setState(connectionState) {
+		this.connectionState = connectionState;
 	}
 
 	loadChar(slot) {
@@ -149,9 +134,26 @@ class Client
 			return null;
 		}
 
-		let character = new Character(characters[slot]);
+		let character = new Player(characters[slot]);
 
 		return character;
+	}
+
+	close(block = null) {
+		if (block != null) {
+			this.write(block);
+		}
+		if (this.socket != null) {
+			this.socket.end();
+		}
+	}
+
+	setClientTracert(tracert) {
+		this.trace = tracert;
+	}
+
+	getTrace() {
+		return this.trace;
 	}
 }
 module.exports = Client;
