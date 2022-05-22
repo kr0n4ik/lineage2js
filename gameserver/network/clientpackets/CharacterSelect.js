@@ -1,4 +1,4 @@
-const ConnectionState = require("../../enums/ConnectionState");
+const ConnectionState = require("../ConnectionState");
 const CharacterSelected = require("../serverpackets/CharacterSelected");
 const LOGGER = (new (require("../../logger/Logger"))("CharacterSelect"));
 

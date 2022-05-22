@@ -9,7 +9,7 @@ class CharacterSelected
 	{
 		packet.writeC(0x0B);
 		packet.writeS(this.cha.getName());
-		packet.writeD(this.cha.getCharId());
+		packet.writeD(this.cha.getId());
 		packet.writeS(this.cha.getTitle());
 		packet.writeD(this.session);
 		packet.writeD(this.cha.getClanId());

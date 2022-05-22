@@ -125,7 +125,6 @@ class UserInfo
 			packet.writeD(this.activeChar.getVisualHairColor());
 			packet.writeD(this.activeChar.getVisualFace());
 			packet.writeC(this.activeChar.isHairAccessoryEnabled() ? 0x01 : 0x00);
-			console.log(this.activeChar.getVisualHairColor());
 		}
 
 		if (this.contains(UserInfoType.STATUS)) {
@@ -156,7 +155,7 @@ class UserInfo
 
 		if (this.contains(UserInfoType.ELEMENTALS)) {
 			packet.writeH(14);
-			packet.writeH(this.activeChar.getDefenseElementValue( AttributeType.FIRE));
+			packet.writeH(this.activeChar.getDefenseElementValue(AttributeType.FIRE));
 			packet.writeH(this.activeChar.getDefenseElementValue(AttributeType.WATER));
 			packet.writeH(this.activeChar.getDefenseElementValue(AttributeType.WIND));
 			packet.writeH(this.activeChar.getDefenseElementValue(AttributeType.EARTH));

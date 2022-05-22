@@ -1,17 +1,15 @@
 const fs = require("fs");
-const Crypt = require("../crypt/Crypt");
+const Crypt = require("../../commons/crypt/Crypt");
 const TableChar = require("../data/TableChar");
 const BaseRecievePacket = require("../network/BaseRecievePacket");
 const BaseSendablePacket = require("../network/BaseSendablePacket");
+const ConnectionState = require("../network/ConnectionState");
 const IncomingPackets = require("../network/IncomingPackets");
-const ConnectionState = require("../enums/ConnectionState");
-const Player = require("./Player");
+const Character = require("./Character");
 const LOGGER = (new (require("../logger/Logger"))("Client"));
 
-class Client
-{
-	constructor(socket) 
-	{
+class Client {
+	constructor(socket)  {
 		this.crypt = new Crypt();
 		this.socket = socket;
 		this.connectionState = ConnectionState.CONNECTED;
@@ -23,8 +21,7 @@ class Client
 		this.trace = null;
 	}
 	
-	read(buffer)
-	{
+	read(buffer) {
 		let size = ( buffer[1] << 8 ) | buffer[0];
 		if (size > buffer.length)
 		{
@@ -63,8 +60,7 @@ class Client
 		//}
 	}
 	
-	write(block)
-	{
+	write(block) {
 		let packet = new BaseSendablePacket();
 		block.write(packet);
 		let data = this.crypt.encrypt(packet.buffer());
@@ -77,8 +73,8 @@ class Client
 		buffer[1] = (buffer.length >> 8) & 0xFF;
 		this.socket.write(buffer);
 	}
-	
-	setConnectionState(connectionState){
+
+	setConnectionState(connectionState) {
 		this.connectionState = connectionState;
 	}
 
@@ -123,6 +119,14 @@ class Client
 		this.connectionState = connectionState;
 	}
 
+	setClientTracert(tracert) {
+		this.trace = tracert;
+	}
+
+	getTrace() {
+		return this.trace;
+	}
+
 	loadChar(slot) {
 		if (slot < 0) {
 			return null;
@@ -134,26 +138,9 @@ class Client
 			return null;
 		}
 
-		let character = new Player(characters[slot]);
+		let character = new Character(characters[slot]);
 
 		return character;
-	}
-
-	close(block = null) {
-		if (block != null) {
-			this.write(block);
-		}
-		if (this.socket != null) {
-			this.socket.end();
-		}
-	}
-
-	setClientTracert(tracert) {
-		this.trace = tracert;
-	}
-
-	getTrace() {
-		return this.trace;
 	}
 }
 module.exports = Client;

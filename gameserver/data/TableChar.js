@@ -1,103 +1,64 @@
-const Generator = require('../generator/generator');
-const TableBaseStats = require('./TableBaseStats');
-const TableInitialEquipment = require('./TableInitialEquipment');
-const TableClassList = require('./TableClassList');
+const crypto = require("crypto");
+const fs = require("fs");
+const Generator = require("../../commons/generator/Generator");
 const LOGGER = (new (require("../logger/Logger"))("TableChar"));
+const TableBaseStats = require("./TableBaseStats");
+
 
 class TableChar
 {
-
 	constructor()
 	{
-		this.characters = [];
-		
-		for (let i = 0; i < 6; ++i)
-		{
-			this.setRandomChar();
-		}
+		this.characters = JSON.parse(fs.readFileSync("cache/characters.json", "utf8"));
 	}
-	
-	getCharById(id)
-	{
-		for (let col of this.characters)
-		{
-			if (col.id == id)
-			{
-				return col;
+
+	getCharacters(account) {
+		let chracters = [];
+		for (let chr of this.characters) {
+			if (chr.account == account) {
+				chracters.push(chr);
+			}
+		}
+		return chracters;
+	}
+
+	getCharacterById(id) {
+		for (let chr of this.characters) {
+			if (chr.id == id) {
+				return chr;
 			}
 		}
 		return null;
 	}
-	
-	getCharacters(id)
-	{
-		return this.characters;
+
+	getIdByName(name) {
+		for (let chr of this.characters) {
+			if (chr.name == name) {
+				return chr.id;
+			}
+		}
+		return null;
+	}
+
+	createCharacter(json) {
+		this.characters.push(json);
+		this.saveCache();
+	}
+
+	deleteCharacter(account, slot) {
+		
 	}
 
 	setOnlineStatus(id) {
-		let col = this.getCharacters(id);
+		let col = this.getCharacterById(id);
 		if (col != null) {
 			col.last = Date.now();
 			col.online = true;
 		}
 	}
-	
-	
-	setRandomChar(account)
-	{
 
-		let classid = TableClassList.getRandomClass();
-		let classbase = TableClassList.getRootClassById(classid.id);
-		let stats = TableBaseStats.getStatsById(classid.id);
-		
-		let inventory = TableInitialEquipment.get(classbase.id);
-		
-		let rndPosition = Math.round(Math.random() * (stats.staticData.creationPoints.length - 1));
-		
-		let HP = stats.lvlUpgainData[1].hp;
-		let hp = Math.round(Math.random() * HP);
-		
-		let MP = stats.lvlUpgainData[1].mp;
-		let mp = Math.round(Math.random() * MP);
-		
-		let sex = Math.round(Math.random());
-		
-		let sp = Math.round(Math.random() * 1000);
-		
-		this.characters.push({
-			'account': account,
-			'online' : false,
-			'id': Generator.getNextId(),
-			'name': "Tester-" + Math.round(Math.random() * 1000),
-			'sex': sex,
-			'race': classid.race,
-			'classid': classid.id,
-			'classbase': classbase.id,
-			'x': parseFloat(stats.staticData.creationPoints[rndPosition].x),
-			'y': parseFloat(stats.staticData.creationPoints[rndPosition].y),
-			'z': parseFloat(stats.staticData.creationPoints[rndPosition].z),
-			'level': 90, 
-			'hp': hp,
-			'HP': HP,
-			'mp': mp,
-			'MP': MP,
-			'sp': sp,
-			'exp': 9,
-			'karma': Math.round(Math.random() * 1000),
-			'pk': Math.round(Math.random() * 1000),
-			'pvp': Math.round(Math.random() * 1000),
-			'face': Math.round(Math.random() * 2),
-			'hair_style': Math.round(Math.random() * (sex == 0) ? 4 : 6),
-			'hair_color': Math.round(Math.random() * 3),
-			'vp': Math.round(Math.random() * 1000),
-			'cp': Math.round(Math.random() * 1000),
-			'CP': 1000,
-			'deletetime': 0,
-			'last': Date.now(),
-			'nobless': Math.round(Math.random() * 1000),
-			'access': Math.round(Math.random() * 1000),
-			'inventory': inventory
-		});
+	saveCache() {
+		fs.writeFileSync("cache/characters.json", JSON.stringify(this.characters));
 	}
 }
 module.exports = new TableChar;

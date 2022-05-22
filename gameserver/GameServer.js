@@ -5,7 +5,7 @@ const Client = require("./model/client");
 const config = require("./config");
 const LOGGER = (new (require("./logger/Logger"))("GameServer"));
 
-require("./data/TableChar");
+
 
 class GameServer {
 	start() {

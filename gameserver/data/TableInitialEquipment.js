@@ -362,7 +362,7 @@ let data = [
 ];
 class TableInitialEquipment
 {
-	get(id) {
+	getEquipmentList(id) {
 		for (let col of data) {
 			if (col.classid == id) {
 				return col.equipment;

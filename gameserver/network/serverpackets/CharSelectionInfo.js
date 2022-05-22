@@ -94,6 +94,7 @@ class CharSelectionInfo
 			packet.writeD(this.getPaperdoll(character.inventory, "cloak"));
 			packet.writeD(this.getPaperdoll(character.inventory, "rhand"));
 			
+			
 			for (let i = 0; i < 42 - 15; ++i)
 			{
 				packet.writeD(0x00);
@@ -136,6 +137,7 @@ class CharSelectionInfo
 			packet.writeC(character.nobless);
 			packet.writeC(0); // Hero glow
 			packet.writeC(0); // Show hair accessory if enabled
+			
 		}
 	}
 

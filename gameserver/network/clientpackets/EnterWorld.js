@@ -5,9 +5,9 @@
 //const ExAdenaInvenCount = require("../serverpackets/ExAdenaInvenCount");
 //const ExUserInfoInvenWeight = require("../serverpackets/ExUserInfoInvenWeight");
 //const ExRotation = require("../serverpackets/ExRotation");
-const UserInfoType = require("../../enums/UserInfoType");
-const ExUserInfoEquipSlot = require("../serverpackets/ExUserInfoEquipSlot");
-const ItemList = require("../serverpackets/ItemList");
+//const UserInfoType = require("../../enums/UserInfoType");
+//const ExUserInfoEquipSlot = require("../serverpackets/ExUserInfoEquipSlot");
+//const ItemList = require("../serverpackets/ItemList");
 const LOGGER = (new (require("../../logger/Logger"))("EnterWorld"));
 
 class EnterWorld 
@@ -77,13 +77,13 @@ class EnterWorld
 		
 		client.write(new UserInfo(activeChar, true));
 
-		client.write(new ItemList(activeChar, false));
+		//client.write(new ItemList(activeChar, false));
 		
 		//client.write(new ExAdenaInvenCount(activeChar));
 		
 		//client.write(new ExUserInfoInvenWeight(activeChar));
 		
-		client.write(new ExUserInfoEquipSlot(activeChar, true));
+		//client.write(new ExUserInfoEquipSlot(activeChar, true));
 		
 		//client.write(new ExRotation(activeChar.getCharId(), activeChar.getHeading()));
 	}

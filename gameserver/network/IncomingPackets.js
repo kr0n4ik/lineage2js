@@ -1,4 +1,4 @@
-const ConnectionState = require("../enums/ConnectionState");
+const ConnectionState = require("./ConnectionState");
 
 let IncomingPackets = {
 	0x00: { 'packet': 'Logout', 'state': ConnectionState.IN_GAME },
